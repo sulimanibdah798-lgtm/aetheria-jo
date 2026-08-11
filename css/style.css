@@ -1,0 +1,427 @@
+/* ======== Mobile Glassmorphism System ======== */
+:root {
+    --bg-dark: #070c14;
+    --bg-card: rgba(15, 23, 42, 0.92);
+    --accent-gold: #f59e0b;
+    --accent-gold-dark: #d97706;
+    --accent-emerald: #10b981;
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --border-glass: rgba(255, 255, 255, 0.12);
+    --border-glow: rgba(245, 158, 11, 0.35);
+    --radius-lg: 16px;
+    --font-ar: 'Tajawal', system-ui, sans-serif;
+    --font-en: 'Segoe UI', system-ui, sans-serif;
+    --scanner-color: #f59e0b; 
+}
+
+* { 
+    box-sizing: border-box; 
+    margin: 0; 
+    padding: 0; 
+    -webkit-tap-highlight-color: transparent; 
+    user-select: none; 
+}
+
+html, body { 
+    width: 100%; 
+    height: 100%;
+    background-color: var(--bg-dark); 
+    color: var(--text-main); 
+    font-family: var(--font-en);
+    background-image: 
+        radial-gradient(circle at 15% 15%, rgba(245, 158, 11, 0.05) 0%, transparent 40%),
+        radial-gradient(circle at 85% 85%, rgba(16, 185, 129, 0.04) 0%, transparent 40%);
+    background-attachment: fixed;
+    overscroll-behavior-y: none; 
+}
+
+html[lang="ar"] body { font-family: var(--font-ar); }
+p, h1, h2, h3, span { user-select: text; }
+
+/* ======== Header Navigation ======== */
+header {
+    background: rgba(7, 12, 20, 0.96);
+    padding: env(safe-area-inset-top, 15px) 14px 14px;
+    display: flex; 
+    align-items: center; 
+    justify-content: space-between;
+    position: sticky; 
+    top: 0; 
+    z-index: 2000;
+    border-bottom: 1px solid var(--border-glass);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5); 
+    height: 70px;
+    direction: ltr !important;
+}
+
+.nav-btn {
+    background: rgba(255, 255, 255, 0.08); 
+    border: 1px solid var(--border-glass);
+    color: var(--accent-gold); 
+    padding: 6px 12px; 
+    border-radius: 20px;
+    font-size: 13px; 
+    font-weight: 700; 
+    cursor: pointer; 
+    display: none; 
+    pointer-events: auto; 
+    min-height: 36px;
+    position: absolute; 
+    left: 14px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    z-index: 2005; 
+    max-width: 110px; 
+    white-space: nowrap; 
+    overflow: hidden; 
+    text-overflow: ellipsis;
+}
+
+.nav-btn:active { transform: translateY(-50%) scale(0.95); }
+
+#header-title { 
+    position: absolute; 
+    left: 50%; 
+    top: 50%; 
+    transform: translate(-50%, -50%);
+    font-size: 1.25rem; 
+    font-weight: 900; 
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text; 
+    -webkit-text-fill-color: transparent;
+    text-align: center; 
+    pointer-events: none;
+    font-family: var(--font-en) !important;
+    letter-spacing: 1.5px;
+    z-index: 2001;
+}
+
+/* 🚨 تصميم زر الـ SOS في الترويسة العلوية 🚨 */
+.header-sos-btn {
+    background: rgba(239, 68, 68, 0.15); 
+    border: 1px solid #ef4444;
+    color: #ef4444; 
+    padding: 6px 12px; 
+    border-radius: 20px;
+    cursor: pointer; 
+    font-weight: 900; 
+    font-size: 13px;
+    position: absolute; 
+    right: 14px; 
+    top: 50%; 
+    transform: translateY(-50%);
+    z-index: 2005; 
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
+    transition: all 0.3s ease; 
+    display: none; 
+}
+.header-sos-btn:active { transform: translateY(-50%) scale(0.95); }
+
+/* حالة الزر عندما يكون البلاغ قيد التنفيذ (زر الإلغاء) */
+.sos-active-state {
+    background: rgba(100, 116, 139, 0.9) !important;
+    border-color: #64748b !important;
+    color: #fff !important;
+    box-shadow: none !important;
+}
+
+/* ======== Search & Tags System ======== */
+.search-box-container { margin-bottom: 5px; width: 100%; }
+.search-input {
+    width: 100%; 
+    padding: 12px 18px; 
+    border-radius: 25px;
+    background: rgba(15, 23, 42, 0.85); 
+    border: 1px solid var(--border-glow);
+    color: var(--text-main); 
+    font-size: 0.9rem; 
+    outline: none;
+    backdrop-filter: blur(10px); 
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    transition: all 0.3s ease; 
+    font-family: inherit;
+}
+.search-input:focus { border-color: var(--accent-gold); box-shadow: 0 0 15px rgba(245, 158, 11, 0.4); }
+html[lang="ar"] .search-input { text-align: right; }
+
+.tags-container { display: flex; gap: 10px; margin-top: 15px; margin-bottom: 10px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
+.tags-container::-webkit-scrollbar { display: none; }
+.tag-pill { background: rgba(255,255,255,0.05); border: 1px solid var(--border-glass); padding: 6px 15px; border-radius: 20px; font-size: 0.85rem; cursor: pointer; white-space: nowrap; transition: 0.3s; color: var(--text-muted); font-weight: 600;}
+.tag-pill.active { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); font-weight: 800; }
+
+/* ======== Main Container & Grid ======== */
+#app-pages {
+    padding: 16px; 
+    max-width: 600px; 
+    margin: 0 auto;
+    height: calc(100vh - 70px);
+    overflow-y: auto; 
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 100px; 
+    overscroll-behavior-y: contain; 
+}
+
+.page-view { display: none; }
+.active-view { display: block; animation: pageIn 0.3s ease-out forwards; }
+@keyframes pageIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ======== Welcome Screen ======== */
+.welcome-container {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 30px 15px 20px; min-height: calc(100vh - 120px);
+}
+.welcome-logo { font-size: 4rem; margin-bottom: 15px; filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.45)); animation: floatLogo 3s ease-in-out infinite alternate; }
+@keyframes floatLogo { from { transform: translateY(0); } to { transform: translateY(-8px); } }
+
+.welcome-title {
+    font-size: 2.2rem; font-weight: 900; background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; letter-spacing: 2px; font-family: var(--font-en);
+}
+.welcome-sub { font-size: 0.95rem; color: var(--text-muted); margin-bottom: 40px; max-width: 320px; line-height: 1.6; }
+.lang-select-box { width: 100%; max-width: 340px; display: flex; flex-direction: column; gap: 14px; direction: ltr !important; }
+.lang-card-btn {
+    background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 18px 24px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.25s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.3); text-align: center;
+}
+.lang-card-btn:active { transform: scale(0.97); border-color: var(--accent-gold); box-shadow: 0 0 20px rgba(245, 158, 11, 0.35); }
+.lang-name { font-size: 1.25rem; font-weight: 800; color: #fff; letter-spacing: 0.5px; }
+
+/* ======== Destinations Grid & Details ======== */
+.section-header { margin-bottom: 16px; text-align: center; }
+.section-title { font-size: 1.4rem; font-weight: 800; color: var(--text-main); }
+.section-subtitle { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+
+.grid-container { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+
+.card { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; position: relative; display: flex; flex-direction: column; transition: all 0.3s ease; }
+.card:active { transform: scale(0.96); border-color: var(--accent-gold); }
+
+.card-img-wrapper { position: relative; width: 100%; height: 120px; background: #1e293b; }
+.card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; }
+
+.badge-rank { position: absolute; top: 8px; right: 8px; background: rgba(7, 12, 20, 0.9); border: 1px solid var(--border-glow); color: var(--accent-gold); font-size: 11px; font-weight: 800; padding: 4px 8px; border-radius: 10px; z-index: 5; }
+html[lang="ar"] .badge-rank { right: auto; left: 8px; }
+
+.card-content { padding: 12px; display: flex; flex-direction: column; flex-grow: 1; }
+
+/* 📍 تعديلات الموقع (أنت هنا) لتكون تحت اسم المدينة 📍 */
+.card-title { 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    font-size: 1rem; 
+    font-weight: 700; 
+    color: var(--accent-gold); 
+    margin-bottom: 4px; 
+}
+.badge-location { 
+    display: inline-block;
+    background: rgba(16, 185, 129, 0.15); 
+    border: 1px solid var(--accent-emerald); 
+    color: var(--accent-emerald); 
+    font-size: 0.7rem; 
+    font-weight: 800; 
+    padding: 3px 8px; 
+    border-radius: 6px; 
+    margin-top: 4px;
+}
+
+.card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* ======== Infinite Image Slider ======== */
+.details-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; margin-bottom: 16px; border: 1px solid var(--border-glass); background: #1e293b; }
+.image-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; width: 100%; height: 220px; scrollbar-width: none; scroll-behavior: auto; }
+.image-slider::-webkit-scrollbar { display: none; }
+.image-slider img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: start; display: block; pointer-events: none; }
+
+.swipe-tutorial {
+    position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); display: none; 
+    flex-direction: column; align-items: center; justify-content: center; background: rgba(15, 23, 42, 0.75); backdrop-filter: blur(5px);
+    padding: 10px 20px; border-radius: 30px; border: 1px solid var(--border-glow); pointer-events: none; z-index: 10; transition: opacity 0.5s ease;
+}
+.swipe-icon { font-size: 24px; color: #fff; animation: swipeHand 1.5s infinite ease-in-out; }
+.swipe-text { color: #fff; font-size: 11px; font-weight: bold; margin-top: 4px; letter-spacing: 0.5px; }
+@keyframes swipeHand { 0% { transform: translateX(15px); } 50% { transform: translateX(-15px); } 100% { transform: translateX(15px); } }
+
+.details-overlay { position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(to top, rgba(7, 12, 20, 0.95), transparent); padding: 20px 16px 16px; pointer-events: none; }
+.details-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.details-subtitle { font-size: 0.9rem; color: var(--accent-gold); }
+.details-body { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 18px; margin-bottom: 16px; line-height: 1.75; color: #cbd5e1; font-size: 0.95rem; }
+
+.action-bar-btn { background: linear-gradient(135deg, #f59e0b, #d97706); color: #000; border: none; border-radius: 30px; padding: 16px 20px; font-size: 1.05rem; font-weight: 800; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; min-height: 54px; }
+.action-bar-btn:active { transform: scale(0.96); }
+
+/* AR Info Badge in Details */
+.ar-info-box { background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: var(--radius-lg); padding: 16px; align-items: center; gap: 15px; margin-bottom: 16px; display: none; }
+.ar-info-icon { font-size: 2rem; flex-shrink: 0;}
+.ar-info-text h4 { margin: 0 0 4px 0; color: var(--accent-emerald); font-size: 1.05rem; font-weight: 700; }
+.ar-info-text p { margin: 0; color: #cbd5e1; font-size: 0.85rem; line-height: 1.4; }
+
+/* ======== Floating Buttons ======== */
+#floating-ar-btn { 
+    position: fixed; 
+    bottom: 25px; 
+    right: 20px; 
+    background: linear-gradient(135deg, #f59e0b, #d97706); 
+    color: #0f172a; 
+    border: 2px solid rgba(255, 255, 255, 0.3); 
+    border-radius: 50px; 
+    padding: 14px 24px; 
+    font-size: 15px; 
+    font-weight: 800; 
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.5); 
+    z-index: 2500; 
+    cursor: pointer; 
+    display: none; 
+    align-items: center; 
+    gap: 8px; 
+    transition: transform 0.2s;
+}
+#floating-ar-btn:active { transform: scale(0.92); }
+
+/* 🎙️ زر المرشد الصوتي الطافي (أسفل اليسار) 🎙️ */
+#floating-voice-btn {
+    position: fixed; 
+    bottom: 25px; 
+    left: 20px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #0f172a; 
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50px; 
+    padding: 14px 24px; 
+    font-size: 15px; 
+    font-weight: 800;
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.5); 
+    z-index: 2500;
+    cursor: pointer; 
+    display: none; 
+    align-items: center; 
+    gap: 8px; 
+    transition: all 0.3s;
+}
+#floating-voice-btn:active { transform: scale(0.92); }
+#floating-voice-btn.playing {
+    background: linear-gradient(135deg, #ef4444, #b91c1c);
+    color: #fff; 
+    box-shadow: 0 8px 20px rgba(239, 68, 68, 0.5);
+}
+
+/* =========================================================
+   🚀 AR ENGINE UI / UX 🚀 
+   ========================================================= */
+body.ar-active { background: transparent !important; background-image: none !important; }
+
+#ar-engine-container { 
+    width: 100vw; height: 100vh; position: fixed; top: 0; left: 0; z-index: 100; 
+    display: none; touch-action: none !important; overflow: hidden; background: transparent; 
+}
+
+#google-viewer-container { 
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 5000; 
+    background: radial-gradient(circle at center, #1e293b 0%, #000000 100%); touch-action: none; overflow: hidden;
+    direction: ltr !important; 
+}
+model-viewer { display: block; width: 100%; height: 100%; outline: none; }
+
+.ar-hotspot {
+    display: block; width: 22px; height: 22px; border-radius: 50%; border: none;
+    background-color: var(--accent-gold); 
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.8), 0 0 20px rgba(245, 158, 11, 0.6);
+    animation: pulseHotspot 1.5s infinite; cursor: pointer; position: relative; outline: none;
+    transition: all 0.3s ease;
+}
+.ar-hotspot:hover, .ar-hotspot:active { transform: scale(1.2); }
+
+@keyframes pulseHotspot {
+    0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+    70% { box-shadow: 0 0 0 15px rgba(245, 158, 11, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+}
+
+.ar-hotspot-tooltip {
+    position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%);
+    background: rgba(15, 23, 42, 0.95); color: #fff; padding: 6px 12px; border-radius: 20px;
+    font-size: 12px; font-weight: bold; white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.3s; border: 1px solid var(--border-glow);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    font-family: var(--font-ar);
+}
+.ar-hotspot:hover .ar-hotspot-tooltip, .ar-hotspot:active .ar-hotspot-tooltip { opacity: 1; }
+
+#ar-ui-layer { 
+    display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 9999; pointer-events: none; touch-action: none; 
+}
+
+.ar-top-bar {
+    position: absolute; top: env(safe-area-inset-top, 20px); left: 0; width: 100%;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 20px; pointer-events: none; z-index: 10000; direction: ltr !important; 
+}
+
+.ar-floating-btn { 
+    background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); border: 1px solid var(--border-glass); 
+    color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); cursor: pointer; pointer-events: auto; font-size: 18px; transition: background 0.3s;
+}
+.ar-floating-btn:active { transform: scale(0.92); }
+.ar-back-btn { background: rgba(220, 38, 38, 0.9); border-color: #ef4444; }
+
+.ar-top-pin-btn {
+    background: #f59e0b; color: #000; border: none;
+    border-radius: 25px; padding: 0 20px; font-size: 14px; font-weight: bold; cursor: pointer; 
+    display: none; justify-content: center; align-items: center; height: 45px; pointer-events: auto; 
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.4); transition: all 0.3s; position: absolute; left: 50%; transform: translateX(-50%);
+}
+.ar-top-pin-btn.is-pinned { background: #10b981; color: white; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4); }
+.ar-top-pin-btn:active { transform: translateX(-50%) scale(0.95); }
+
+.ar-guide-btn { background: rgba(15, 23, 42, 0.85); border: 1px solid var(--accent-gold); color: var(--accent-gold); }
+.ar-guide-btn.playing { background: rgba(220, 38, 38, 0.3); border-color: #ef4444; color: white; }
+
+#ar-info-toggle { position: absolute; bottom: 25px; right: 20px; z-index: 10001; display: none; direction: ltr !important; }
+#ar-reset-camera-btn { position: absolute; bottom: 25px; left: 20px; z-index: 10001; display: none; direction: ltr !important; }
+#ar-sos-btn { position: absolute; bottom: 85px; left: 20px; z-index: 10001; display: none; background: rgba(220, 38, 38, 0.9); border-color: #ef4444; direction: ltr !important; }
+
+#ar-bottom-panel {
+    position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(15px);
+    border-top: 1px solid rgba(255, 255, 255, 0.1); border-top-left-radius: 25px; border-top-right-radius: 25px;
+    padding: 10px 20px calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateY(120%); 
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: auto; box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+    display: flex; flex-direction: column; gap: 15px; z-index: 6000;
+}
+
+#ar-bottom-panel.active { transform: translateY(0); }
+#ar-bottom-panel.hidden-by-user { transform: translateY(120%) !important; transition: transform 0.3s ease-in; }
+
+#ar-panel-drag-area { width: 100%; display: flex; flex-direction: column; align-items: center; padding-top: 5px; touch-action: pan-y; cursor: grab; }
+.panel-drag-handle { width: 60px; height: 6px; background: rgba(255, 255, 255, 0.3); border-radius: 10px; margin-bottom: 10px; position: relative; display: flex; justify-content: center; }
+.panel-drag-handle::after { content: '﹀'; position: absolute; top: 6px; color: rgba(255,255,255,0.6); font-size: 14px; font-weight: bold; pointer-events: none; }
+
+.ar-panel-header { width: 100%; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; }
+.ar-panel-title { font-size: 1.4rem; color: var(--accent-gold); margin: 0; font-weight: 900; pointer-events: none; }
+
+.ar-audio-btn { background: rgba(245, 158, 11, 0.2); border: 1px solid var(--accent-gold); color: white; width: 40px; height: 40px; border-radius: 50%; font-size: 18px; cursor: pointer; flex-shrink:0; display: flex; justify-content: center; align-items: center; transition: all 0.3s; pointer-events: auto; }
+.ar-audio-btn.playing { background: rgba(220, 38, 38, 0.4); border-color: #ef4444; }
+
+.ar-panel-desc { max-height: 30vh; overflow-y: auto; color: #cbd5e1; line-height: 1.7; font-size: 1rem; overscroll-behavior-y: contain; touch-action: pan-y; padding-right: 5px; }
+
+/* 🚫 الإخفاء الإجباري لرسائل خطأ الكاميرا والتوافق 🚫 */
+.mindar-ui-compatibility, .mindar-ui-error, .mindar-ui-overlay h1, .mindar-ui-overlay p, .mindar-ui-overlay a { display: none !important; opacity: 0 !important; visibility: hidden !important; pointer-events: none !important; height: 0 !important; width: 0 !important; }
+.mindar-ui-overlay.mindar-ui-loading, .a-loader-title { display: none !important; }
+.mindar-ui-overlay { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: transparent !important; z-index: 9998 !important; pointer-events: none; display: flex !important; justify-content: center !important; align-items: center !important; }
+
+/* 🌟 ماسح الليزر الفضائي (Sci-Fi Scanner) 🌟 */
+#sci-fi-scanner { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70vw; height: 70vw; max-width: 300px; max-height: 300px; pointer-events: none; transition: opacity 0.3s; z-index: 9999; }
+.scan-corner { position: absolute; width: 40px; height: 40px; border-color: var(--scanner-color); border-style: solid; }
+.tl { top: 0; left: 0; border-width: 4px 0 0 4px; } .tr { top: 0; right: 0; border-width: 4px 4px 0 0; }
+.bl { bottom: 0; left: 0; border-width: 0 0 4px 4px; } .br { bottom: 0; right: 0; border-width: 0 4px 4px 0; }
+.laser-line { position: absolute; top: 0; left: 5%; width: 90%; height: 2px; background: var(--accent-emerald); box-shadow: 0 0 10px var(--accent-emerald); animation: scan-laser 2s infinite alternate ease-in-out; }
+@keyframes scan-laser { 0% { top: 5%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 95%; opacity: 0; } }
+
+#custom-scan-text { position: absolute; top: -45px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.85); color: white; padding: 6px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; border: 1px solid var(--scanner-color); white-space: nowrap; pointer-events: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: block; }
+
+body:not(.ar-active) #sci-fi-scanner,
+body.marker-found #sci-fi-scanner { display: none !important; }
+
+#toast-notification { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(220, 38, 38, 0.95); color: white; padding: 12px 24px; border-radius: 30px; font-size: 13px; font-weight: 800; z-index: 10005; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; white-space: nowrap; }

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Aetheria - Smart Archaeological Guide</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="libs/aframe.min.js"></script>
+    <script src="libs/mindar.js"></script>
+    <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.1.1/model-viewer.min.js"></script>
+
+    <script>
+        self.ModelViewerElement = self.ModelViewerElement || {};
+        self.ModelViewerElement.dracoDecoderLocation = 'libs/draco/';
+    </script>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <div id="toast-notification">Notification</div>
+
+    <header id="main-header">
+        <button id="nav-back-btn" class="nav-btn" onclick="navigateBack()">❮ Lang</button>
+        <span id="header-title">AETHERIA</span>
+        
+        <!-- 🚨 زر الـ SOS في الترويسة العلوية 🚨 -->
+        <button id="sos-btn" class="header-sos-btn" onclick="triggerSOS()">🚨 SOS</button>
+    </header>
+
+    <!-- 📸 زر الواقع المعزز الطافي (أسفل اليمين) -->
+    <button id="floating-ar-btn" onclick="openARExperience()" id="btn-open-ar">
+        <span style="font-size: 20px;">📸</span> <span id="ar-btn-txt">Scan AR</span>
+    </button>
+
+    <!-- 🎙️ المرشد الصوتي الطافي (أسفل اليسار) 🎙️ -->
+    <button id="floating-voice-btn" onclick="toggleGlobalVoiceAssistant()">
+        <span style="font-size: 20px;">🎙️</span> <span id="txt-voice-btn">Guide</span>
+    </button>
+
+    <div id="app-pages">
+        <div id="view-welcome" class="page-view active-view">
+            <div class="welcome-container">
+                <div class="welcome-logo">🏛️</div>
+                <h1 class="welcome-title">AETHERIA</h1>
+                <p class="welcome-sub" id="lbl-welcome-sub">Explore Jordan's ancient heritage with WebAR and interactive guides</p>
+                <div class="lang-select-box">
+                    <div class="lang-card-btn" onclick="selectLanguageAndStart('ar')">
+                        <span class="lang-name">العربية</span>
+                    </div>
+                    <div class="lang-card-btn" onclick="selectLanguageAndStart('en')">
+                        <span class="lang-name">English</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-cities" class="page-view">
+            <div class="section-header">
+                <h1 class="section-title" id="lbl-cities-title">Destinations</h1>
+                <p class="section-subtitle" id="lbl-cities-sub">Explore heritage sites across Jordan offline</p>
+            </div>
+            <div class="search-box-container">
+                <input type="text" id="search-input" class="search-input" placeholder="Search cities or monuments... 🔍" oninput="handleSearchInput(this.value)">
+                <div class="tags-container" id="tagsList"></div>
+            </div>
+            <div class="grid-container" id="cities-grid"></div>
+            <div class="grid-container" id="search-results-grid" style="display: none;"></div>
+        </div>
+
+        <div id="view-landmarks" class="page-view">
+            <div class="section-header">
+                <h1 class="section-title" id="lbl-landmarks-title">City Monuments</h1>
+                <p class="section-subtitle" id="lbl-landmarks-sub">Sorted by historical significance</p>
+            </div>
+            <div class="grid-container" id="landmarks-grid"></div>
+        </div>
+
+        <div id="view-details" class="page-view">
+            <div class="details-hero">
+                <div id="dtl-image-slider" class="image-slider"></div>
+                <div id="swipe-tutorial" class="swipe-tutorial">
+                    <div class="swipe-icon">👆</div>
+                    <div class="swipe-text" id="txt-swipe-tutorial">Swipe for more</div>
+                </div>
+                <div class="details-overlay">
+                    <h2 id="dtl-title" class="details-title"></h2>
+                    <span id="dtl-rank" class="details-subtitle"></span>
+                </div>
+            </div>
+            
+            <div id="ar-info-box" class="ar-info-box">
+                <div class="ar-info-icon">✨</div>
+                <div class="ar-info-text">
+                    <h4 id="txt-ar-box-title">3D AR Experience Available</h4>
+                    <p id="txt-ar-box-desc">Visit this site in person and use the scanner to bring history to life!</p>
+                </div>
+            </div>
+
+            <button class="action-bar-btn" onclick="openARExperience()" id="btn-open-ar">
+                <span>📸</span> <span id="txt-start-ar">Experience in WebAR</span>
+            </button>
+            <button class="action-bar-btn" id="dtl-audio-btn" onclick="toggleDetailsAudio()" style="background: rgba(30, 41, 59, 0.9); border: 1px solid var(--border-glow); color: #fff;">
+                <span>🎧</span> <span id="txt-listen">Listen to Story</span>
+            </button>
+            <div class="details-body" id="dtl-desc"></div>
+        </div>
+    </div>
+
+    <div id="google-viewer-container">
+        <model-viewer id="google-3d-model" src="" camera-controls auto-rotate disable-pan environment-image="neutral" shadow-intensity="1.5" exposure="0.6" interpolation-decay="200" min-camera-orbit="auto auto 0m"></model-viewer>    
+    </div>
+
+    <div id="ar-engine-container"></div>
+
+    <div id="ar-ui-layer">
+        
+        <div id="sci-fi-scanner">
+            <div id="custom-scan-text">Scanning for marker... 🔍</div>
+            <div class="scan-corner tl"></div><div class="scan-corner tr"></div>
+            <div class="scan-corner bl"></div><div class="scan-corner br"></div>
+            <div class="laser-line"></div>
+        </div>
+
+        <div class="ar-top-bar">
+            <button class="ar-floating-btn ar-back-btn" onclick="closeARExperience()">✖</button>
+            <button class="ar-top-pin-btn" id="ar-top-pin-btn" onclick="togglePinDetach()">📌 Detach Model</button>
+            <button class="ar-floating-btn ar-guide-btn" id="ar-top-guide-btn" onclick="toggleARVoiceTutorial()">🎧</button>
+        </div>
+
+        <button id="ar-info-toggle" class="ar-floating-btn" onclick="showBottomPanel()">ℹ️</button>
+        <button id="ar-reset-camera-btn" class="ar-floating-btn" onclick="resetARCamera()">🔄</button>
+        
+        <!-- 🚨 زر الـ SOS الدائري المصغر داخل شاشة الواقع المعزز -->
+        <button id="ar-sos-btn" class="ar-floating-btn" onclick="triggerSOS()">🚨</button>
+
+        <div id="ar-bottom-panel">
+            <div id="ar-panel-drag-area">
+                <div class="panel-drag-handle"></div>
+                <div class="ar-panel-header">
+                    <h2 class="ar-panel-title" id="ar-monument-title">Monument</h2>
+                    <button class="ar-audio-btn" id="ar-audio-btn" onclick="toggleARVoiceStory()">🔊</button>
+                </div>
+            </div>
+            <div class="ar-panel-desc" id="ar-monument-desc">Description</div>
+        </div>
+    </div>
+
+    <!-- 📡 استدعاء مكتبة Socket للاتصال وتلقي رسالة "عُلم" -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/data.js"></script>
+    <script src="js/app.js"></script>
+
+</body>
+</html>

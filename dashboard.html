@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Aetheria - Command Core</title>
+    <link rel="icon" href="data:,"> 
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600;800&family=Tajawal:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-dark: #070c14; --bg-card: rgba(15, 23, 42, 0.92);
+            --accent-gold: #f59e0b; --success: #10b981;
+            --warning: #f59e0b; --danger: #ef4444;
+            --text-main: #f8fafc; --text-muted: #94a3b8;
+            --border-glass: rgba(255, 255, 255, 0.12);
+            --radius-lg: 16px;
+            --font-ar: 'Tajawal', system-ui, sans-serif;
+            --font-en: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { background-color: var(--bg-dark); color: var(--text-main); font-family: var(--font-en); min-height: 100vh; overflow-x: hidden; }
+        html[lang="ar"] body { font-family: var(--font-ar); }
+
+        /* ======== Login Screen ======== */
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-dark); display: flex; justify-content: center; align-items: center; z-index: 9999; transition: 0.5s; }
+        .login-card { background: var(--bg-card); border: 1px solid var(--border-glass); border-radius: var(--radius-lg); padding: 40px 30px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .login-title { font-size: 1.8rem; font-weight: 900; color: var(--accent-gold); margin-bottom: 5px; }
+        .input-group input { width: 100%; padding: 14px 20px; background: rgba(7, 12, 20, 0.8); border: 1px solid var(--border-glass); border-radius: 25px; color: #fff; margin-bottom: 15px; }
+        .login-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #f59e0b, #d97706); font-weight: 800; border-radius: 25px; cursor: pointer; border: none; }
+        .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 15px; opacity: 0; }
+
+        /* ======== Dashboard Layout ======== */
+        #dashboard-screen { display: none; padding: 20px; max-width: 1300px; margin: 0 auto; animation: fadeIn 0.5s forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 25px; background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border-glass); margin-bottom: 25px; }
+        .navbar h1 { margin: 0; font-size: 1.4rem; color: var(--accent-gold); font-weight: 900; }
+        button#langBtn { background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border-glass); color: var(--accent-gold); padding: 8px 16px; border-radius: 20px; cursor: pointer; font-family: inherit;}
+
+        .stats-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .stat-card { background: var(--bg-card); padding: 25px; border-radius: var(--radius-lg); border: 1px solid var(--border-glass); text-align: center; }
+        .stat-card .value { font-size: 2.5rem; font-weight: 900; }
+
+        /* ======== تخطيط مقسم (الرئيسي + القائمة الجانبية) ======== */
+        .dashboard-layout { display: flex; gap: 25px; align-items: flex-start; }
+        .main-content { flex: 1; min-width: 0; }
+        
+        .sidebar { 
+            flex: 0 0 320px; 
+            background: rgba(15, 23, 42, 0.6); 
+            border: 1px solid var(--border-glass); 
+            border-radius: var(--radius-lg); 
+            padding: 20px; 
+            min-height: 400px; 
+        }
+        
+        @media (max-width: 900px) {
+            .dashboard-layout { flex-direction: column; }
+            .sidebar { width: 100%; flex: none; }
+        }
+
+        .section-title { font-size: 1.1rem; color: var(--text-muted); border-bottom: 1px solid var(--border-glass); padding-bottom: 10px; margin-bottom: 15px; font-weight: 800; }
+
+        /* ======== شبكات العرض ======== */
+        #sosGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        #touristsGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+
+        /* تصميم البطاقات السياحية والإنذارات الجديدة */
+        .tourist-card { background: var(--bg-card); border-radius: var(--radius-lg); padding: 20px 20px 0 20px; border: 1px solid var(--border-glass); position: relative; overflow: hidden; display: flex; flex-direction: column; transition: 0.3s; }
+        .tourist-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-glass); padding-bottom: 12px; margin-bottom: 15px; }
+        .tourist-header h3 { margin: 0; color: var(--accent-gold); font-size: 1.1rem; }
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 0.95rem; }
+        .info-label { color: var(--text-muted); }
+        .info-value { font-weight: bold; }
+        .card-body { flex-grow: 1; padding-bottom: 20px;}
+
+        /* 🚨 شريط الإنذار الأحمر 🚨 */
+        .sos-action-bar { background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; text-align: center; padding: 12px; margin: 0 -20px 0 -20px; cursor: pointer; font-weight: 900; font-size: 1.1rem; letter-spacing: 1px; transition: 0.3s; animation: pulseRed 1s infinite alternate; }
+        @keyframes pulseRed { 0% { background: #ef4444; } 100% { background: #991b1b; } }
+        .sos-alert-card { border-color: var(--danger); box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); }
+
+        /* ❌ حالة الإلغاء */
+        .sos-canceled-card { border-color: var(--warning) !important; box-shadow: 0 0 10px rgba(245, 158, 11, 0.2) !important; background: rgba(245, 158, 11, 0.05) !important; }
+        .sos-canceled-bar { background: #475569 !important; animation: none !important; color: #cbd5e1 !important; }
+
+        .sos-active-tourist { border-color: var(--danger) !important; box-shadow: 0 0 20px rgba(239, 68, 68, 0.5) !important; background: rgba(69, 10, 10, 0.4) !important; animation: pulseCard 1s infinite alternate; }
+        @keyframes pulseCard { 0% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.3); } 100% { box-shadow: 0 0 30px rgba(239, 68, 68, 0.8); } }
+
+        /* ======== قائمة البلاغات الجانبية (Incident Logs) ======== */
+        #incidentList { display: flex; flex-direction: column; gap: 15px; }
+        
+        .incident-card {
+            background: var(--bg-card); border: 1px solid var(--warning); border-radius: 12px; padding: 15px;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.15); transition: 0.3s;
+        }
+        .incident-card.canceled { border-color: var(--text-muted); box-shadow: none; opacity: 0.8; }
+        
+        .incident-header { display: flex; justify-content: space-between; margin-bottom: 12px; font-weight: 800; font-size: 0.95rem; }
+        .incident-header.active { color: var(--warning); }
+        .incident-header.canceled { color: var(--text-muted); }
+        
+        .incident-loc { font-size: 1rem; margin-bottom: 8px; font-weight: bold; color: #fff; direction: ltr; }
+        .incident-time { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; display: flex; justify-content: space-between;}
+        
+        .resolve-btn {
+            background: rgba(16, 185, 129, 0.2); color: var(--success); width: 100%; padding: 10px; 
+            border: 1px solid var(--success); border-radius: 8px; font-family: inherit; font-size: 0.9rem;
+            font-weight: 900; cursor: pointer; transition: 0.3s;
+        }
+        .resolve-btn:hover { background: var(--success); color: #fff; }
+        .resolve-btn.dismiss-btn { background: rgba(71, 85, 105, 0.3); border-color: #64748b; color: #cbd5e1; }
+        .resolve-btn.dismiss-btn:hover { background: #475569; color: #fff; }
+
+        /* Status & Signals */
+        .signal-bars { display: flex; gap: 3px; align-items: flex-end; height: 18px; }
+        .bar { width: 4px; background: #334155; border-radius: 2px; transition: background 0.3s; }
+        .bar:nth-child(1) { height: 6px; } .bar:nth-child(2) { height: 12px; } .bar:nth-child(3) { height: 18px; }
+        .status-close { color: var(--success); } .status-mid { color: var(--warning); } .status-far { color: var(--danger); }
+        .sig-close .bar { background: var(--success); box-shadow: 0 0 5px var(--success); }
+        .sig-mid .bar:nth-child(1), .sig-mid .bar:nth-child(2) { background: var(--warning); box-shadow: 0 0 5px var(--warning); }
+        .sig-far .bar:nth-child(1) { background: var(--danger); box-shadow: 0 0 5px var(--danger); }
+        .flash { animation: dataUpdatePulse 0.6s ease-out; }
+        @keyframes dataUpdatePulse { 0% { border-color: var(--accent-gold); box-shadow: 0 0 20px rgba(245, 158, 11, 0.4); } 100% { border-color: var(--border-glass); box-shadow: none; } }
+    </style>
+</head>
+<body>
+
+    <div id="login-screen">
+        <div class="login-card">
+            <div class="login-logo">🏛️</div>
+            <h1 class="login-title">AETHERIA</h1>
+            <p style="color: var(--text-muted); margin-bottom: 30px;" id="login-sub-text">Command Core Access</p>
+            <div class="input-group"><input type="text" id="username" placeholder="Username" autocomplete="off"></div>
+            <div class="input-group"><input type="password" id="password" placeholder="Password"></div>
+            <button class="login-btn" onclick="attemptLogin()">ACCESS SYSTEM</button>
+            <div class="error-msg" id="login-error">Invalid Credentials.</div>
+        </div>
+    </div>
+
+    <div id="dashboard-screen">
+        <nav class="navbar"><h1 id="titleText">AETHERIA TRACKER 📡</h1><button id="langBtn">🌐 عربي</button></nav>
+        
+        <div class="stats-container">
+            <div class="stat-card" id="card-node"><h3 id="lbl-node">Active Node</h3><div class="value" id="node-id" style="color: var(--accent-gold);">Scanning...</div></div>
+            <div class="stat-card" id="card-count"><h3 id="lbl-count">Tourists Detected</h3><div class="value" id="total-count">0</div></div>
+        </div>
+
+        <div class="dashboard-layout">
+            <!-- الجزء الرئيسي (يسار/يمين) -->
+            <div class="main-content">
+                <!-- الإنذارات الجديدة تظهر هنا -->
+                <div id="sosGrid"></div>
+                
+                <h2 class="section-title" id="lbl-tourists-list">Active Tourists Matrix</h2>
+                <div id="touristsGrid"></div>
+            </div>
+
+            <!-- القائمة الجانبية للمهام (Incident Logs) -->
+            <div class="sidebar">
+                <h2 class="section-title" id="lbl-incident-logs" style="border-bottom: 2px solid var(--accent-gold); color: #fff;">📋 Incident Logs</h2>
+                <div id="incidentList">
+                    <!-- سيتم إضافة البلاغات التي تم استلامها هنا كـ Tasks -->
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const correctUser = "Aether"; const correctPass = "Core";
+        let audioCtx = null; let sirenOsc = null; let sirenInterval = null;
+
+        document.getElementById('password').addEventListener('keypress', e => { if (e.key === 'Enter') attemptLogin(); });
+        function attemptLogin() {
+            if (document.getElementById('username').value.trim() === correctUser && document.getElementById('password').value === correctPass) {
+                document.getElementById('login-error').style.opacity = '0'; document.getElementById('login-screen').style.opacity = '0';
+                try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+                setTimeout(() => { document.getElementById('login-screen').style.display = 'none'; document.getElementById('dashboard-screen').style.display = 'block'; }, 500);
+            } else document.getElementById('login-error').style.opacity = '1';
+        }
+
+        function playSiren() {
+            if(!audioCtx || sirenOsc) return; sirenOsc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            sirenOsc.connect(gain); gain.connect(audioCtx.destination); sirenOsc.type = 'square'; gain.gain.value = 0.1;
+            sirenOsc.frequency.setValueAtTime(600, audioCtx.currentTime); sirenOsc.start();
+            sirenInterval = setInterval(() => { if(sirenOsc) sirenOsc.frequency.value = sirenOsc.frequency.value === 600 ? 800 : 600; }, 400);
+        }
+        function stopSiren() { if(sirenOsc) { sirenOsc.stop(); sirenOsc.disconnect(); sirenOsc = null; clearInterval(sirenInterval); } }
+
+        let socket; try { socket = io(); } catch(e) {}
+        
+        let lang = 'en'; 
+        let activeSOSAlerts = []; 
+        let currentTouristsData = []; 
+
+        document.getElementById('langBtn').addEventListener('click', () => {
+            lang = lang === 'en' ? 'ar' : 'en'; document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+            document.getElementById('langBtn').innerText = lang === 'en' ? "🌐 عربي" : "🌐 English";
+            document.getElementById('titleText').innerText = lang === 'en' ? "AETHERIA TRACKER 📡" : "أثيريا - التتبع 📡";
+            document.getElementById('lbl-node').innerText = lang === 'en' ? "Active Node" : "العقدة النشطة";
+            document.getElementById('lbl-count').innerText = lang === 'en' ? "Tourists" : "السياح";
+            document.getElementById('lbl-tourists-list').innerText = lang === 'en' ? "Active Tourists Matrix" : "شبكة السياح المتصلين";
+            document.getElementById('lbl-incident-logs').innerText = lang === 'en' ? "📋 Incident Logs" : "📋 قائمة البلاغات";
+            
+            // تغيير اتجاه النص في العناصر
+            document.getElementById('lbl-incident-logs').style.textAlign = lang === 'ar' ? 'right' : 'left';
+            document.getElementById('lbl-tourists-list').style.textAlign = lang === 'ar' ? 'right' : 'left';
+
+            renderSOS(); renderTourists(currentTouristsData);
+        });
+
+        // 🚨 رسم بطاقات الإنذار (توزع على الشبكة الرئيسية والقائمة الجانبية) 🚨
+        function renderSOS() {
+            const sosContainer = document.getElementById('sosGrid'); 
+            const incidentContainer = document.getElementById('incidentList');
+            sosContainer.innerHTML = ''; incidentContainer.innerHTML = '';
+            
+            // تشغيل الصوت فقط إذا كان هناك بلاغ "جديد" لم يتم تأكيده ولم يتم إلغاؤه
+            const hasNewAlerts = activeSOSAlerts.some(s => !s.canceled && !s.acknowledged);
+            if(hasNewAlerts) playSiren(); else stopSiren();
+
+            if (activeSOSAlerts.filter(s => s.acknowledged).length === 0) {
+                incidentContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-size: 0.9rem; margin-top: 20px;">${lang === 'en' ? 'No active incidents.' : 'لا توجد بلاغات قيد التنفيذ.'}</p>`;
+            }
+
+            activeSOSAlerts.forEach((sos, index) => {
+                const locationString = `${sos.city} - ${sos.node} (${sos.rssi} dBm)`;
+                const locLbl = lang === 'en' ? 'Location:' : 'الموقع:';
+                const timeLbl = lang === 'en' ? 'Time:' : 'الوقت:';
+
+                if (!sos.acknowledged) {
+                    // --- 1. بلاغ جديد (في الشاشة الرئيسية) ---
+                    const card = document.createElement('div');
+                    card.className = `tourist-card sos-alert-card ${sos.canceled ? 'sos-canceled-card' : ''}`;
+                    const titleText = sos.canceled ? (lang==='en'?'⚠️ Canceled (False Alarm)':'⚠️ تم الإلغاء (إنذار خاطئ)') : '🚨 SOS Emergency!';
+                    const titleColor = sos.canceled ? 'var(--warning)' : 'var(--danger)';
+                    const btnTxt = sos.canceled ? (lang==='ar'?'إخفاء البلاغ ❌':'Dismiss ❌') : (lang === 'ar' ? 'عُلم - إرسال تأكيد الاستجابة ✓' : 'Acknowledge & Respond ✓');
+
+                    card.innerHTML = `
+                        <div class="card-body">
+                            <div class="tourist-header"><h3 style="color: ${titleColor};">${titleText}</h3></div>
+                            <div class="info-row"><span class="info-label">${locLbl}</span><span class="info-value" style="color: ${titleColor}; direction: ltr; text-align: ${lang==='en'?'left':'right'};">${locationString}</span></div>
+                            <div class="info-row"><span class="info-label">${timeLbl}</span><span class="info-value">${sos.time}</span></div>
+                        </div>
+                        <div class="sos-action-bar ${sos.canceled ? 'sos-canceled-bar' : ''}" onclick="acknowledgeSOS(${index}, '${sos.clientId}')">${btnTxt}</div>
+                    `;
+                    sosContainer.appendChild(card);
+                } else {
+                    // --- 2. بلاغ مُستلم (تم نقله كـ Task للقائمة الجانبية) ---
+                    const card = document.createElement('div');
+                    card.className = `incident-card ${sos.canceled ? 'canceled' : ''}`;
+                    const headerClass = sos.canceled ? 'canceled' : 'active';
+                    const titleText = sos.canceled ? (lang==='en'?'⚠️ Canceled':'⚠️ أُلغي') : (lang==='en'?'🟡 Responding...':'🟡 قيد الاستجابة...');
+                    const btnTxt = lang === 'en' ? 'Resolve Task ✓' : 'إنهاء البلاغ ✓';
+
+                    card.innerHTML = `
+                        <div class="incident-header ${headerClass}"><span>${titleText}</span> <span>${sos.time}</span></div>
+                        <div class="incident-loc" style="text-align: ${lang==='en'?'left':'right'};">${locationString}</div>
+                        <div class="incident-time"><span>MAC: <span style="font-family: monospace;">${sos.mac}</span></span></div>
+                        <button class="resolve-btn ${sos.canceled ? 'dismiss-btn' : ''}" onclick="resolveSOS(${index})">${sos.canceled ? (lang==='ar'?'إخفاء':'Dismiss') : btnTxt}</button>
+                    `;
+                    incidentContainer.appendChild(card);
+                }
+            });
+        }
+
+        // دالة "عُلم" (تأكيد الاستلام)
+        window.acknowledgeSOS = function(index, clientId) {
+            const sos = activeSOSAlerts[index];
+            if (sos.canceled) {
+                // إذا أُلغي وهو في الشاشة الرئيسية، يُحذف فوراً
+                activeSOSAlerts.splice(index, 1);
+            } else {
+                // إرسال رد للسائح ونقله للقائمة الجانبية (Logs)
+                if(socket) socket.emit('sos_acknowledge', { clientId: clientId });
+                sos.acknowledged = true;
+            }
+            renderSOS(); renderTourists(currentTouristsData);
+        };
+
+        // دالة "إنهاء البلاغ" (من القائمة الجانبية)
+        window.resolveSOS = function(index) {
+            // حذف البلاغ نهائياً لأنه تم حله
+            activeSOSAlerts.splice(index, 1);
+            renderSOS(); renderTourists(currentTouristsData);
+        };
+
+        function renderTourists(tourists) {
+            const grid = document.getElementById('touristsGrid'); grid.innerHTML = ''; 
+            tourists.forEach((t, i) => {
+                let statusText = t.rssi >= -60 ? (lang==='en'?'Very Close':'قريب جداً') : t.rssi >= -80 ? (lang==='en'?'Mid Range':'متوسط') : (lang==='en'?'Far':'بعيد');
+                let statusClass = t.rssi >= -60 ? "status-close" : t.rssi >= -80 ? "status-mid" : "status-far";
+                let sigClass = t.rssi >= -60 ? "sig-close" : t.rssi >= -80 ? "sig-mid" : "sig-far";
+
+                // تلوين السائح بالأحمر إذا كان بلاغه فعالاً ولم يُلغى 
+                // (حتى لو كان في الـ Logs، يبقى أحمر لنميزه على الخريطة/الشبكة)
+                const isSosActive = activeSOSAlerts.some(sos => sos.mac === t.id && !sos.canceled);
+                const card = document.createElement('div'); 
+                card.className = `tourist-card ${isSosActive ? 'sos-active-tourist' : ''}`;
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="tourist-header"><h3 style="color: ${isSosActive?'var(--danger)':'var(--accent-gold)'};">${isSosActive?'🚨 NEEDS HELP!':`👤 Tourist #${i + 1}`}</h3><div class="signal-bars ${sigClass}"><div class="bar"></div><div class="bar"></div><div class="bar"></div></div></div>
+                        <div class="info-row"><span class="info-label">MAC:</span><span class="info-value" style="font-family:monospace;">${t.id}</span></div>
+                        <div class="info-row"><span class="info-label">RSSI:</span><span class="info-value ${statusClass}">${t.rssi} dBm</span></div>
+                        <div class="info-row"><span class="info-label">Status:</span><span class="info-value ${statusClass}">${statusText}</span></div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        if(socket) {
+            socket.on('esp_update', (data) => {
+                document.getElementById('node-id').innerText = data.nodeID || "Gate_Alpha";
+                if(data.tourists) {
+                    document.getElementById('total-count').innerText = data.tourists.length;
+                    currentTouristsData = data.tourists.sort((a, b) => b.rssi - a.rssi);
+                    
+                    let sosUpdated = false;
+                    // تحديث الـ dBm الحي للبطاقات في الداشبورد والـ Logs
+                    activeSOSAlerts.forEach(sos => {
+                        const matchingTourist = currentTouristsData.find(t => t.id === sos.mac);
+                        if (matchingTourist) { sos.rssi = matchingTourist.rssi; sosUpdated = true; }
+                    });
+                    if(sosUpdated) renderSOS();
+                    
+                    renderTourists(currentTouristsData);
+                    document.querySelectorAll('.stat-card').forEach(c => { c.classList.remove('flash'); void c.offsetWidth; c.classList.add('flash'); });
+                }
+            });
+
+            socket.on('sos_alert', (data) => { 
+                // وضع خاصية acknowledged افتراضياً بـ false
+                data.acknowledged = false;
+                activeSOSAlerts.push(data); 
+                renderSOS(); renderTourists(currentTouristsData); 
+            });
+            
+            socket.on('sos_cancel', (data) => {
+                const targetSos = activeSOSAlerts.find(s => s.clientId === data.clientId && !s.canceled);
+                if (targetSos) { targetSos.canceled = true; renderSOS(); renderTourists(currentTouristsData); }
+            });
+        }
+    </script>
+</body>
+</html>
